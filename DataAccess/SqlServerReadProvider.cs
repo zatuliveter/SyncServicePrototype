@@ -10,10 +10,11 @@ public class SqlServerReadProvider(string connStr) : IDataReadProvider
 
 	public async Task<IEnumerable<T>> QueryAsync<T>(
 		string sql,
-		object parameters = null,
+		object? parameters = null,
 		CommandType commandType = CommandType.Text)
 	{
 		using SqlConnection conn = new SqlConnection(_connectionString);
+		
 		// Dapper works with any IDbConnection
 		return await conn.QueryAsync<T>(
 			sql,

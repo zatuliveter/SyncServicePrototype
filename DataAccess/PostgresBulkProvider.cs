@@ -18,17 +18,15 @@ public class PostgresBulkProvider(string connStr) : IBulkUpsertProvider
 		// Get members in a fixed order
 		Member[] members = accessor.GetMembers().ToArray();
 
-		await using NpgsqlConnection conn =
-			new NpgsqlConnection(_connectionString);
+		await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+
 		await conn.OpenAsync();
 
 		// Metadata lookup must be case-insensitive
 		// This metadata can be cached. 
-		Dictionary<string, NpgsqlDbType> columnTypes =
-			await GetColumnMetadata(conn, tableName);
+		Dictionary<string, NpgsqlDbType> columnTypes = await GetColumnMetadata(conn, tableName);
 
-		await using NpgsqlTransaction trans =
-			await conn.BeginTransactionAsync();
+		await using NpgsqlTransaction trans = await conn.BeginTransactionAsync();
 		try
 		{
 			string tempTable = $"temp_{tableName}";

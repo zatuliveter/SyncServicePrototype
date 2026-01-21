@@ -22,8 +22,8 @@ public class SqlServerBulkProvider(string connStr) : IBulkUpsertProvider
 		using SqlConnection conn = new SqlConnection(_connectionString);
 		await conn.OpenAsync();
 
-		using SqlTransaction trans =
-			(SqlTransaction)conn.BeginTransaction();
+		using SqlTransaction trans = conn.BeginTransaction();
+
 		try
 		{
 			// MSSQL uses # for local temporary tables
@@ -33,16 +33,13 @@ public class SqlServerBulkProvider(string connStr) : IBulkUpsertProvider
 			string createSql = $"SELECT TOP 0 * INTO {tempTable} " +
 							   $"FROM {tableName}";
 
-			using SqlCommand createCmd = new SqlCommand(
-				createSql, conn, trans);
+			using SqlCommand createCmd = new SqlCommand(createSql, conn, trans);
 			await createCmd.ExecuteNonQueryAsync();
 
 			// ObjectReader creates IDataReader from IEnumerable<T>
-			using (ObjectReader reader = ObjectReader.Create(
-				data, columnNames))
+			using (ObjectReader reader = ObjectReader.Create(data, columnNames))
 			{
-				using SqlBulkCopy bulkCopy = new SqlBulkCopy(
-					conn, SqlBulkCopyOptions.Default, trans);
+				using SqlBulkCopy bulkCopy = new SqlBulkCopy(conn, SqlBulkCopyOptions.Default, trans);
 
 				bulkCopy.DestinationTableName = tempTable;
 
@@ -57,17 +54,13 @@ public class SqlServerBulkProvider(string connStr) : IBulkUpsertProvider
 
 			// Prepare MERGE logic
 			IEnumerable<string> updateColumns = columnNames
-				.Where(c => !c.Equals(keyColumn,
-					StringComparison.OrdinalIgnoreCase));
+				.Where(c => !c.Equals(keyColumn, StringComparison.OrdinalIgnoreCase));
 
-			string updateSet = string.Join(", ", updateColumns
-				.Select(c => $"T.[{c}] = S.[{c}]"));
+			string updateSet = string.Join(", ", updateColumns.Select(c => $"T.[{c}] = S.[{c}]"));
 
-			string columnsList = string.Join(", ",
-				columnNames.Select(c => $"[{c}]"));
+			string columnsList = string.Join(", ", columnNames.Select(c => $"[{c}]"));
 
-			string valuesList = string.Join(", ",
-				columnNames.Select(c => $"S.[{c}]"));
+			string valuesList = string.Join(", ", columnNames.Select(c => $"S.[{c}]"));
 
 			// Use MERGE for high-performance atomic Upsert
 			string mergeSql = $@"
@@ -78,8 +71,8 @@ public class SqlServerBulkProvider(string connStr) : IBulkUpsertProvider
                 WHEN NOT MATCHED THEN INSERT ({columnsList}) 
                 VALUES ({valuesList});";
 
-			using SqlCommand mergeCmd = new SqlCommand(
-				mergeSql, conn, trans);
+			using SqlCommand mergeCmd = new SqlCommand(mergeSql, conn, trans);
+
 			await mergeCmd.ExecuteNonQueryAsync();
 
 			await trans.CommitAsync();

@@ -2,4 +2,5 @@
   <Project Path="ConsoleApp1/ConsoleApp1.csproj" />
   <Project Path="DataAccess/DataAccess.csproj" />
   <Project Path="Services/Services.csproj" Id="33e425fb-19a5-417c-b84a-99293f43a555" />
+  <Project Path="SyncExample/SyncExample.csproj" Id="d848520c-c506-43fe-a03e-ab8a951527c0" />
 </Solution>

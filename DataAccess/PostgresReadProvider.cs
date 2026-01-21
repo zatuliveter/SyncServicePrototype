@@ -17,7 +17,7 @@ public class PostgresReadProvider : IDataReadProvider
 
 	public async Task<IEnumerable<T>> QueryAsync<T>(
 		string sql,
-		object parameters = null,
+		object? parameters = null,
 		CommandType commandType = CommandType.Text)
 	{
 		await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
