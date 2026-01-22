@@ -14,17 +14,20 @@ public class CopyTask
 		// 1. Initialize Source Reader
 		IDataReadProvider reader = CreateReader(
 			definition.SourceProviderType,
-			definition.SourceConnectionString);
+			definition.SourceConnectionString
+		);
 
 		// 2. Initialize Destination Writer
 		IBulkUpsertProvider writer = CreateWriter(
 			definition.DestinationProviderType,
-			definition.DestinationConnectionString);
+			definition.DestinationConnectionString
+		);
 
 		// 3. Extract data from Source
 		IEnumerable<TSource> sourceData = await reader.QueryAsync<TSource>(
 			definition.SourceQuery,
-			definition.SourceParameters);
+			definition.SourceParameters
+		);
 
 		// 4. Transform TSource -> TTarget
 		IEnumerable<TTarget> targetData = sourceData.Select(definition.Mapper);
@@ -33,10 +36,11 @@ public class CopyTask
 		await writer.ExecuteUpsertAsync<TTarget>(
 			definition.DestinationTableName,
 			targetData,
-			definition.KeyColumn);
+			definition.KeyColumn
+		);
 	}
 
-	private IDataReadProvider CreateReader(ProviderType type, string connStr)
+	private static IDataReadProvider CreateReader(ProviderType type, string connStr)
 	{
 		return type switch
 		{
@@ -46,7 +50,7 @@ public class CopyTask
 		};
 	}
 
-	private IBulkUpsertProvider CreateWriter(ProviderType type, string connStr)
+	private static IBulkUpsertProvider CreateWriter(ProviderType type, string connStr)
 	{
 		return type switch
 		{
