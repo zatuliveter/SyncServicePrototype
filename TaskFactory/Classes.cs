@@ -20,7 +20,10 @@ public abstract class TaskBase<TParams> : ITask
 	{
 		if (parameters is not TParams typedParams)
 		{
-			throw new ArgumentException($"Task expects parameters of type {typeof(TParams).Name}, but got {parameters?.GetType().Name ?? "null"}");
+			throw new InvalidOperationException(
+				$"Task {GetType().Name} expects parameters of type {typeof(TParams).FullName}, " +
+				$"but got {parameters?.GetType().FullName ?? "null"}"
+			);
 		}
 
 		return ExecuteAsync(typedParams, context, ct);
@@ -109,16 +112,17 @@ public class CustomLoadOrdersTask : ITask
 	}
 }
 
-public record CopyDataDefinition
+public sealed record CopyDataDefinition
 {
-	public string SourceTableName { get; set; }
+	public required string SourceTableName { get; init; }
+	// ... other properties.
 }
 
 
 public static class Definitions
 {
-	public static CopyDataDefinition UsersCopyDefinition = new() { SourceTableName = "UserTable" };
-	public static CopyDataDefinition ClientsCopyDefinition = new() { SourceTableName = "UserTable" };
+	public static readonly CopyDataDefinition UsersCopyDefinition = new() { SourceTableName = "UserTable" };
+	public static readonly CopyDataDefinition ClientsCopyDefinition = new() { SourceTableName = "UserTable" };
 }
 
 public class CopyData : TaskBase<CopyDataDefinition>
