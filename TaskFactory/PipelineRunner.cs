@@ -19,7 +19,6 @@ public sealed class PipelineRunner(
 	)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(parallelTaskCount);
-
 		_validator.Validate(pipeline);
 
 		PipelineContext context = new();
@@ -27,11 +26,10 @@ public sealed class PipelineRunner(
 		context.PipelineCancellation = cts.Token;
 
 		Dictionary<string, TaskNode> nodes = BuildGraph(pipeline);
-
 		ConcurrentDictionary<string, Exception> errors = new(StringComparer.OrdinalIgnoreCase);
 
 		ConcurrentQueue<TaskNode> readyQueue = new(
-			nodes.Values.Where(n => n.RemainingDependenciesCount == 0)
+			nodes.Values.Where(static n => n.RemainingDependenciesCount == 0)
 		);
 
 		List<Task<TaskNode>> running = [];
@@ -46,17 +44,18 @@ public sealed class PipelineRunner(
 					return node;
 
 				node.Status = TaskExecutionStatus.Running;
-
 				object? task = _services.GetService(node.Item.TaskType);
 
 				if (task is null)
 				{
-					throw new InvalidOperationException($"Cannot find {node.Item.TaskType} in DI container.");
+					throw new InvalidOperationException(
+						$"Cannot find {node.Item.TaskType.Name} in DI.");
 				}
 
 				if (task is not ITask taskInstance)
 				{
-					throw new InvalidOperationException($"Task type {node.Item.TaskType} must implement ITask.");
+					throw new InvalidOperationException(
+						$"Type {node.Item.TaskType.Name} must implement ITask.");
 				}
 
 				await taskInstance.ProcessAsync(
@@ -94,46 +93,24 @@ public sealed class PipelineRunner(
 			running.Remove(finishedTask);
 
 			TaskNode finishedNode = await finishedTask.ConfigureAwait(false);
-
 			OnNodeFinished(finishedNode);
-
 			EnqueueReady();
 		}
 
-		Debug.Assert(nodes.Values.All(n => n.Status != TaskExecutionStatus.Running));
+		return BuildResult(nodes, errors);
 
-		PipelineRunResult result = new()
-		{
-			Tasks = nodes.Values.ToDictionary(
-				n => n.Item.Id,
-				n => new TaskRunResult
-				{
-					Status = n.Status,
-					Error = errors.TryGetValue(n.Item.Id, out Exception? ex) ? ex : null
-				},
-				StringComparer.OrdinalIgnoreCase
-			)
-		};
-
-		result.IsSuccess = result.Tasks.Values.All(x => x.Status == TaskExecutionStatus.Success);
-
-		return result;
-
-		// ---------------- local helpers ----------------
+		// --- Local Helpers ---
 
 		void EnqueueReady()
 		{
 			while (readyQueue.TryDequeue(out TaskNode? node))
 			{
-				if (node.Status != TaskExecutionStatus.NotStarted)
+				if (node.Status != TaskExecutionStatus.NotStarted || cts.IsCancellationRequested)
+				{
 					continue;
+				}
 
-				if (cts.IsCancellationRequested)
-					return;
-
-				node.Status = TaskExecutionStatus.Running;
-
-				var task = RunNodeAsync(node);
+				Task<TaskNode> task = RunNodeAsync(node);
 				running.Add(task);
 			}
 		}
@@ -150,16 +127,10 @@ public sealed class PipelineRunner(
 			foreach (string depId in finished.Dependents)
 			{
 				TaskNode depNode = nodes[depId];
-
-				if (depNode.Status != TaskExecutionStatus.NotStarted)
-					continue;
+				if (depNode.Status != TaskExecutionStatus.NotStarted) continue;
 
 				int newCount = Interlocked.Decrement(ref depNode.RemainingDependenciesCount);
-
-				if (newCount == 0)
-				{
-					readyQueue.Enqueue(depNode);
-				}
+				if (newCount == 0) readyQueue.Enqueue(depNode);
 			}
 		}
 
@@ -168,7 +139,6 @@ public sealed class PipelineRunner(
 			foreach (string depId in node.Dependents)
 			{
 				TaskNode dep = nodes[depId];
-
 				if (dep.Status == TaskExecutionStatus.NotStarted)
 				{
 					dep.Status = TaskExecutionStatus.Skipped;
@@ -178,11 +148,33 @@ public sealed class PipelineRunner(
 		}
 	}
 
+	private static PipelineRunResult BuildResult(
+		Dictionary<string, TaskNode> nodes,
+		ConcurrentDictionary<string, Exception> errors
+	)
+	{
+		Dictionary<string, TaskRunResult> tasks = nodes.Values.ToDictionary(
+			n => n.Item.Id,
+			n => new TaskRunResult
+			{
+				Status = n.Status,
+				Error = errors.TryGetValue(n.Item.Id, out Exception? ex) ? ex : null
+			},
+			StringComparer.OrdinalIgnoreCase
+		);
+
+		return new PipelineRunResult
+		{
+			Tasks = tasks,
+			IsSuccess = tasks.Values.All(static x => x.Status == TaskExecutionStatus.Success)
+		};
+	}
+
 	private static Dictionary<string, TaskNode> BuildGraph(IPipeline pipeline)
 	{
 		Dictionary<string, TaskNode> nodes = pipeline.Items.ToDictionary(
-			x => x.Id,
-			x => new TaskNode
+			static x => x.Id,
+			static x => new TaskNode
 			{
 				Item = x,
 				Dependents = [],
@@ -199,7 +191,6 @@ public sealed class PipelineRunner(
 				nodes[dep].Dependents.Add(node.Item.Id);
 			}
 		}
-
 		return nodes;
 	}
 }
