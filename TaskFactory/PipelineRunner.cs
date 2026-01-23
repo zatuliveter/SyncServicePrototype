@@ -4,10 +4,9 @@ using System.Diagnostics;
 namespace TaskFactory;
 
 public sealed class PipelineRunner(
-		IServiceProvider services,
-		IPipelineValidator validator
-	)
-	: IPipelineRunner
+	IServiceProvider services,
+	IPipelineValidator validator
+) : IPipelineRunner
 {
 	private readonly IServiceProvider _services = services;
 	private readonly IPipelineValidator _validator = validator;
@@ -32,19 +31,19 @@ public sealed class PipelineRunner(
 		ConcurrentDictionary<string, Exception> errors = new(StringComparer.OrdinalIgnoreCase);
 
 		ConcurrentQueue<TaskNode> readyQueue = new(
-			nodes.Values.Where(n => n.RemainingDependencies.Count == 0)
+			nodes.Values.Where(n => n.RemainingDependenciesCount == 0)
 		);
 
-		HashSet<Task> runningTasks = new();
+		List<Task<TaskNode>> running = [];
 		SemaphoreSlim semaphore = new(parallelTaskCount);
 
-		async Task RunNodeAsync(TaskNode node)
+		async Task<TaskNode> RunNodeAsync(TaskNode node)
 		{
 			await semaphore.WaitAsync(cts.Token).ConfigureAwait(false);
 			try
 			{
 				if (cts.IsCancellationRequested)
-					return;
+					return node;
 
 				node.Status = TaskExecutionStatus.Running;
 
@@ -52,12 +51,12 @@ public sealed class PipelineRunner(
 
 				if (task is null)
 				{
-					throw new Exception($"Cannot find {node.Item.TaskType} in dependencies.");
+					throw new InvalidOperationException($"Cannot find {node.Item.TaskType} in DI container.");
 				}
-				
+
 				if (task is not ITask taskInstance)
 				{
-					throw new Exception($"Task type {node.Item.TaskType} must implement ITask.");
+					throw new InvalidOperationException($"Task type {node.Item.TaskType} must implement ITask.");
 				}
 
 				await taskInstance.ProcessAsync(
@@ -83,46 +82,26 @@ public sealed class PipelineRunner(
 			{
 				semaphore.Release();
 			}
+
+			return node;
 		}
 
-		while (true)
+		EnqueueReady();
+
+		while (running.Count > 0)
 		{
-			// Schedule ready tasks
-			while (readyQueue.TryDequeue(out TaskNode? node))
-			{
-				if (node.Status != TaskExecutionStatus.NotStarted)
-					continue;
+			Task<TaskNode> finishedTask = await Task.WhenAny(running).ConfigureAwait(false);
+			running.Remove(finishedTask);
 
-				if (cts.IsCancellationRequested)
-					break;
+			TaskNode finishedNode = await finishedTask.ConfigureAwait(false);
 
-				Task task = RunNodeAsync(node);
+			OnNodeFinished(finishedNode);
 
-				lock (runningTasks)
-				{
-					runningTasks.Add(task);
-				}				
-
-				_ = task.ContinueWith(t =>
-				{
-					lock (runningTasks)
-					{
-						runningTasks.Remove(t);
-					}
-
-					OnNodeFinished(node, failureMode, nodes, readyQueue);
-				}, TaskScheduler.Default);
-			}
-
-			if (runningTasks.Count == 0 && readyQueue.IsEmpty)
-				break;
-
-			await Task.Delay(10, ct).ConfigureAwait(false);
+			EnqueueReady();
 		}
 
 		Debug.Assert(nodes.Values.All(n => n.Status != TaskExecutionStatus.Running));
 
-		// Build result
 		PipelineRunResult result = new()
 		{
 			Tasks = nodes.Values.ToDictionary(
@@ -131,50 +110,70 @@ public sealed class PipelineRunner(
 				{
 					Status = n.Status,
 					Error = errors.TryGetValue(n.Item.Id, out Exception? ex) ? ex : null
-				}
+				},
+				StringComparer.OrdinalIgnoreCase
 			)
 		};
 
 		result.IsSuccess = result.Tasks.Values.All(x => x.Status == TaskExecutionStatus.Success);
 
 		return result;
-	}
 
-	private static void SkipDependentsRecursively(TaskNode node, Dictionary<string, TaskNode> nodes)
-	{
-		foreach (string depId in node.Dependents)
+		// ---------------- local helpers ----------------
+
+		void EnqueueReady()
 		{
-			TaskNode dep = nodes[depId];
-			if (dep.Status == TaskExecutionStatus.NotStarted)
+			while (readyQueue.TryDequeue(out TaskNode? node))
 			{
-				dep.Status = TaskExecutionStatus.Skipped;
-				SkipDependentsRecursively(dep, nodes);
+				if (node.Status != TaskExecutionStatus.NotStarted)
+					continue;
+
+				if (cts.IsCancellationRequested)
+					return;
+
+				node.Status = TaskExecutionStatus.Running;
+
+				var task = RunNodeAsync(node);
+				running.Add(task);
 			}
 		}
-	}
 
-	private static void OnNodeFinished(
-		TaskNode finished, 
-		PipelineFailureMode failureMode, 
-		Dictionary<string, TaskNode> nodes, 
-		ConcurrentQueue<TaskNode> readyQueue
-	)
-	{
-		if (finished.Status == TaskExecutionStatus.Failed &&
-			failureMode == PipelineFailureMode.SkipDependentTasks)
+		void OnNodeFinished(TaskNode finished)
 		{
-			SkipDependentsRecursively(finished, nodes);
+			if (finished.Status == TaskExecutionStatus.Failed &&
+				failureMode == PipelineFailureMode.SkipDependentTasks)
+			{
+				SkipDependentsRecursively(finished);
+				return;
+			}
+
+			foreach (string depId in finished.Dependents)
+			{
+				TaskNode depNode = nodes[depId];
+
+				if (depNode.Status != TaskExecutionStatus.NotStarted)
+					continue;
+
+				int newCount = Interlocked.Decrement(ref depNode.RemainingDependenciesCount);
+
+				if (newCount == 0)
+				{
+					readyQueue.Enqueue(depNode);
+				}
+			}
 		}
 
-		foreach (string depId in finished.Dependents)
+		void SkipDependentsRecursively(TaskNode node)
 		{
-			TaskNode depNode = nodes[depId];
-			depNode.RemainingDependencies.Remove(finished.Item.Id);
-
-			if (depNode.RemainingDependencies.Count == 0 &&
-				depNode.Status == TaskExecutionStatus.NotStarted)
+			foreach (string depId in node.Dependents)
 			{
-				readyQueue.Enqueue(depNode);
+				TaskNode dep = nodes[depId];
+
+				if (dep.Status == TaskExecutionStatus.NotStarted)
+				{
+					dep.Status = TaskExecutionStatus.Skipped;
+					SkipDependentsRecursively(dep);
+				}
 			}
 		}
 	}
@@ -186,14 +185,14 @@ public sealed class PipelineRunner(
 			x => new TaskNode
 			{
 				Item = x,
-				RemainingDependencies = new HashSet<string>(x.DependsOn, StringComparer.OrdinalIgnoreCase),
 				Dependents = [],
+				RemainingDependenciesCount = x.DependsOn.Count,
 				Status = TaskExecutionStatus.NotStarted
 			},
 			StringComparer.OrdinalIgnoreCase
 		);
 
-		foreach (TaskNode? node in nodes.Values)
+		foreach (TaskNode node in nodes.Values)
 		{
 			foreach (string dep in node.Item.DependsOn)
 			{
