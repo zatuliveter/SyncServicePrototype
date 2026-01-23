@@ -9,7 +9,7 @@ public sealed class PipelineValidator : IPipelineValidator
 			throw new InvalidOperationException("Pipeline contains no items.");
 
 		// 1. Unique IDs
-		var duplicates = pipeline.Items
+		string[] duplicates = pipeline.Items
 			.GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
 			.Where(g => g.Count() > 1)
 			.Select(g => g.Key)
@@ -20,12 +20,12 @@ public sealed class PipelineValidator : IPipelineValidator
 				"Duplicate task ids: " + string.Join(", ", duplicates)
 			);
 
-		var itemsById = pipeline.Items.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+		Dictionary<string, PipelineItemBase> itemsById = pipeline.Items.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
 		// 2. All dependencies must exist
-		foreach (var item in pipeline.Items)
+		foreach (PipelineItemBase item in pipeline.Items)
 		{
-			foreach (var dep in item.DependsOn)
+			foreach (string dep in item.DependsOn)
 			{
 				if (!itemsById.ContainsKey(dep))
 				{
@@ -37,10 +37,10 @@ public sealed class PipelineValidator : IPipelineValidator
 		}
 
 		// 3. Cycle detection (DFS)
-		var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		var stack = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		HashSet<string> visited = new(StringComparer.OrdinalIgnoreCase);
+		HashSet<string> stack = new(StringComparer.OrdinalIgnoreCase);
 
-		foreach (var item in pipeline.Items)
+		foreach (PipelineItemBase item in pipeline.Items)
 		{
 			Visit(item.Id);
 		}
@@ -56,8 +56,8 @@ public sealed class PipelineValidator : IPipelineValidator
 			visited.Add(id);
 			stack.Add(id);
 
-			var node = itemsById[id];
-			foreach (var dep in node.DependsOn)
+			PipelineItemBase node = itemsById[id];
+			foreach (string dep in node.DependsOn)
 			{
 				Visit(dep);
 			}

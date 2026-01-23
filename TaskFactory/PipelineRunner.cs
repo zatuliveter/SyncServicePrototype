@@ -23,20 +23,20 @@ public sealed class PipelineRunner(
 
 		_validator.Validate(pipeline);
 
-		var context = new PipelineContext();
-		using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+		PipelineContext context = new();
+		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 		context.PipelineCancellation = cts.Token;
 
-		var nodes = BuildGraph(pipeline);
+		Dictionary<string, TaskNode> nodes = BuildGraph(pipeline);
 
-		var errors = new ConcurrentDictionary<string, Exception>(StringComparer.OrdinalIgnoreCase);
+		ConcurrentDictionary<string, Exception> errors = new(StringComparer.OrdinalIgnoreCase);
 
-		var readyQueue = new ConcurrentQueue<TaskNode>(
+		ConcurrentQueue<TaskNode> readyQueue = new(
 			nodes.Values.Where(n => n.RemainingDependencies.Count == 0)
 		);
 
-		var runningTasks = new HashSet<Task>();
-		var semaphore = new SemaphoreSlim(parallelTaskCount);
+		HashSet<Task> runningTasks = new();
+		SemaphoreSlim semaphore = new(parallelTaskCount);
 
 		async Task RunNodeAsync(TaskNode node)
 		{
@@ -48,7 +48,7 @@ public sealed class PipelineRunner(
 
 				node.Status = TaskExecutionStatus.Running;
 
-				var task = _services.GetService(node.Item.TaskType);
+				object? task = _services.GetService(node.Item.TaskType);
 
 				if (task is null)
 				{
@@ -88,7 +88,7 @@ public sealed class PipelineRunner(
 		while (true)
 		{
 			// Schedule ready tasks
-			while (readyQueue.TryDequeue(out var node))
+			while (readyQueue.TryDequeue(out TaskNode? node))
 			{
 				if (node.Status != TaskExecutionStatus.NotStarted)
 					continue;
@@ -96,7 +96,7 @@ public sealed class PipelineRunner(
 				if (cts.IsCancellationRequested)
 					break;
 
-				var task = RunNodeAsync(node);
+				Task task = RunNodeAsync(node);
 
 				lock (runningTasks)
 				{
@@ -123,14 +123,14 @@ public sealed class PipelineRunner(
 		Debug.Assert(nodes.Values.All(n => n.Status != TaskExecutionStatus.Running));
 
 		// Build result
-		var result = new PipelineRunResult
+		PipelineRunResult result = new()
 		{
 			Tasks = nodes.Values.ToDictionary(
 				n => n.Item.Id,
 				n => new TaskRunResult
 				{
 					Status = n.Status,
-					Error = errors.TryGetValue(n.Item.Id, out var ex) ? ex : null
+					Error = errors.TryGetValue(n.Item.Id, out Exception? ex) ? ex : null
 				}
 			)
 		};
@@ -142,9 +142,9 @@ public sealed class PipelineRunner(
 
 	private static void SkipDependentsRecursively(TaskNode node, Dictionary<string, TaskNode> nodes)
 	{
-		foreach (var depId in node.Dependents)
+		foreach (string depId in node.Dependents)
 		{
-			var dep = nodes[depId];
+			TaskNode dep = nodes[depId];
 			if (dep.Status == TaskExecutionStatus.NotStarted)
 			{
 				dep.Status = TaskExecutionStatus.Skipped;
@@ -166,9 +166,9 @@ public sealed class PipelineRunner(
 			SkipDependentsRecursively(finished, nodes);
 		}
 
-		foreach (var depId in finished.Dependents)
+		foreach (string depId in finished.Dependents)
 		{
-			var depNode = nodes[depId];
+			TaskNode depNode = nodes[depId];
 			depNode.RemainingDependencies.Remove(finished.Item.Id);
 
 			if (depNode.RemainingDependencies.Count == 0 &&
@@ -181,7 +181,7 @@ public sealed class PipelineRunner(
 
 	private static Dictionary<string, TaskNode> BuildGraph(IPipeline pipeline)
 	{
-		var nodes = pipeline.Items.ToDictionary(
+		Dictionary<string, TaskNode> nodes = pipeline.Items.ToDictionary(
 			x => x.Id,
 			x => new TaskNode
 			{
@@ -193,9 +193,9 @@ public sealed class PipelineRunner(
 			StringComparer.OrdinalIgnoreCase
 		);
 
-		foreach (var node in nodes.Values)
+		foreach (TaskNode? node in nodes.Values)
 		{
-			foreach (var dep in node.Item.DependsOn)
+			foreach (string dep in node.Item.DependsOn)
 			{
 				nodes[dep].Dependents.Add(node.Item.Id);
 			}
