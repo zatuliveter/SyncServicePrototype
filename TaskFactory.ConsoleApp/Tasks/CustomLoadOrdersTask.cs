@@ -1,7 +1,7 @@
 ﻿
 using Serilog;
 
-namespace TaskFactory.ConsoleApp;
+namespace TaskFactory.ConsoleApp.Tasks;
 
 
 public class CustomLoadOrdersTask(ILogger logger) : ITask
@@ -13,6 +13,6 @@ public class CustomLoadOrdersTask(ILogger logger) : ITask
 
 		_logger.Information("{pipelineName}.{taskId}: Loading orders...", context.PipelineName, taskId);
 
-		await Task.Delay(new Random().Next(3000), ct);
+		await Task.Delay(1000, ct);
 	}
 }

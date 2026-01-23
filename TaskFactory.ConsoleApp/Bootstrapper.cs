@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
+using TaskFactory.ConsoleApp.Tasks;
 namespace TaskFactory.ConsoleApp;
 
 public static class Bootstrapper
@@ -14,6 +15,7 @@ public static class Bootstrapper
 		_ = services
 			.AddSingleton<ILogger>(logger)
 			.AddTransient<SendEmailTask>()
-			.AddTransient<CustomLoadOrdersTask>();
+			.AddTransient<CustomLoadOrdersTask>()
+			.AddTransient<CopyDataDemo>();
 	}
 }

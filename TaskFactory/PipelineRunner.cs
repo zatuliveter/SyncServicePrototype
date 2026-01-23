@@ -25,13 +25,14 @@ public sealed class PipelineRunner(
 		_logger.Information("{pipelineName}: {Status}", pipeline.Name, "Started");
 		_validator.Validate(pipeline);
 
-		PipelineContext context = new()
+		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+		PipelineContext pipelineContext = new()
 		{
 			PipelineName = pipeline.Name,
-			StartTime = DateTimeOffset.UtcNow
+			StartTime = DateTimeOffset.UtcNow,
+			PipelineCancellation = cts.Token
 		};
-		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-		context.PipelineCancellation = cts.Token;
 
 		Dictionary<string, TaskNode> nodes = BuildGraph(pipeline);
 		ConcurrentDictionary<string, Exception> errors = new(StringComparer.OrdinalIgnoreCase);
@@ -71,7 +72,7 @@ public sealed class PipelineRunner(
 				await taskInstance.ProcessAsync(
 					node.Item.Parameters,
 					node.Item.Id,
-					context,
+					pipelineContext,
 					cts.Token
 				).ConfigureAwait(false);
 
@@ -110,7 +111,7 @@ public sealed class PipelineRunner(
 			EnqueueReady();
 		}
 
-		return BuildResult(nodes, errors);
+		return BuildResult(nodes, errors, pipelineContext);
 
 		// --- Local Helpers ---
 
@@ -163,7 +164,8 @@ public sealed class PipelineRunner(
 
 	private static PipelineRunResult BuildResult(
 		Dictionary<string, TaskNode> nodes,
-		ConcurrentDictionary<string, Exception> errors
+		ConcurrentDictionary<string, Exception> errors,
+		PipelineContext pipelineContext
 	)
 	{
 		Dictionary<string, TaskRunResult> tasks = nodes.Values.ToDictionary(
@@ -179,7 +181,9 @@ public sealed class PipelineRunner(
 		return new PipelineRunResult
 		{
 			Tasks = tasks,
-			IsSuccess = tasks.Values.All(static x => x.Status == TaskExecutionStatus.Success)
+			IsSuccess = tasks.Values.All(static x => x.Status == TaskExecutionStatus.Success),
+			PipelineStartTime = pipelineContext.StartTime,
+			PipelineEndTime = DateTimeOffset.UtcNow
 		};
 	}
 

@@ -3,10 +3,10 @@ using Serilog;
 
 namespace TaskFactory.Common;
 
-public class CopyTableTask<TSource, TTarget> 
+public class CopyTableTask<TSource, TTarget>
 	(
 		ILogger logger
-	)	
+	)
 	: TaskBase<CopyTableDefinition<TSource, TTarget>>
 		where TSource : class
 		where TTarget : class

@@ -2,9 +2,14 @@
 
 public sealed class PipelineRunResult
 {
-	public bool IsSuccess { get; set; }
+	public required bool IsSuccess { get; init; }
 
-	// key = TaskId
-	public IReadOnlyDictionary<string, TaskRunResult> Tasks { get; init; }
+	public required DateTimeOffset PipelineStartTime { get; init; }
+
+	public required DateTimeOffset PipelineEndTime { get; init; }
+
+	public TimeSpan Duration => PipelineEndTime - PipelineStartTime;
+
+	public required IReadOnlyDictionary<string, TaskRunResult> Tasks { get; init; }
 		= new Dictionary<string, TaskRunResult>();
 }

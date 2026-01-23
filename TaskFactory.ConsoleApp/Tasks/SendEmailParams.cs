@@ -1,5 +1,4 @@
-﻿
-namespace TaskFactory.ConsoleApp;
+﻿namespace TaskFactory.ConsoleApp.Tasks;
 
 public record SendEmailParams
 {
