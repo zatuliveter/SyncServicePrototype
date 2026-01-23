@@ -1,14 +1,17 @@
-﻿using System.Collections.Concurrent;
+﻿using Serilog;
+using System.Collections.Concurrent;
 
 namespace TaskFactory;
 
 public sealed class PipelineRunner(
 	IServiceProvider services,
-	IPipelineValidator validator
+	IPipelineValidator validator,
+	ILogger logger
 ) : IPipelineRunner
 {
 	private readonly IServiceProvider _services = services;
 	private readonly IPipelineValidator _validator = validator;
+	private readonly ILogger _logger = logger;
 
 	public async Task<PipelineRunResult> RunAsync(
 		IPipeline pipeline,
@@ -18,6 +21,8 @@ public sealed class PipelineRunner(
 	)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(parallelTaskCount);
+
+		_logger.Information("Validating pipeline {pipelineName}.", pipeline.Name);
 		_validator.Validate(pipeline);
 
 		PipelineContext context = new();
@@ -43,6 +48,8 @@ public sealed class PipelineRunner(
 					return node;
 
 				node.Status = TaskExecutionStatus.Running;
+				_logger.Information("Starting task {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
+
 				object? task = _services.GetService(node.Item.TaskType);
 
 				if (task is null)
@@ -65,10 +72,13 @@ public sealed class PipelineRunner(
 				).ConfigureAwait(false);
 
 				node.Status = TaskExecutionStatus.Success;
+				_logger.Information("Task completed {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
 			}
 			catch (Exception ex)
 			{
 				node.Status = TaskExecutionStatus.Failed;
+				_logger.Information(ex, "Task failed {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
+
 				errors[node.Item.Id] = ex;
 
 				if (failureMode == PipelineFailureMode.FailPipeline)

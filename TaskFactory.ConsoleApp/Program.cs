@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using TaskFactory;
 using TaskFactory.ConsoleApp;
 
@@ -26,6 +25,15 @@ PipelineRunResult result = await runner.RunAsync(
 );
 
 
+if (!result.IsSuccess)
+{
+	throw new AggregateException(
+		"Pipeline failed",
+		result.Tasks.Where(t => t.Value.Status == TaskExecutionStatus.Failed).Select(t => t.Value.Error!)
+	);
+}
+
+Console.WriteLine("Done.");
 
 
 

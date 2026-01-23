@@ -1,9 +1,13 @@
-﻿namespace TaskFactory;
+﻿using Serilog;
 
-public class CopyData : TaskBase<CopyDataDefinition>
+namespace TaskFactory;
+
+public class CopyData (ILogger logger)
+	: TaskBase<CopyDataDefinition>
 {
 	protected override Task ExecuteAsync(CopyDataDefinition args, IPipelineContext context, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		logger.Information("Copying from {SourceTable}", args.SourceTableName);
+		return Task.CompletedTask;
 	}
 }
