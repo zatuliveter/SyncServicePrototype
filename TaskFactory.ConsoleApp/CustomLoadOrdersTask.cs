@@ -6,7 +6,7 @@ namespace TaskFactory.ConsoleApp;
 
 public class CustomLoadOrdersTask(ILogger logger) : ITask
 {
-	private readonly ILogger _logger = logger.ForContext<CopyData>();
+	private readonly ILogger _logger = logger.ForContext<CustomLoadOrdersTask>();
 
 	public async Task ProcessAsync(object? parameters, string taskId, IPipelineContext context, CancellationToken ct)
 	{

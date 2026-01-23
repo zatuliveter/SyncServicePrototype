@@ -96,7 +96,7 @@ public class PostgresBulkProvider(string connStr) : IBulkUpsertProvider
 	}
 
 	private async Task<Dictionary<string, NpgsqlDbType>> GetColumnMetadata(NpgsqlConnection conn, string tableName)
-	{		
+	{
 		var types = new Dictionary<string, NpgsqlDbType>();
 		// Query to get UDT names for columns
 		var sql = @"SELECT column_name, udt_name 

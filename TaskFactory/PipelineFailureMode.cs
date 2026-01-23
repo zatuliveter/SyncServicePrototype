@@ -1,7 +1,7 @@
 ﻿namespace TaskFactory;
 
-public enum PipelineFailureMode 
-{ 
-	FailPipeline, 
-	SkipDependentTasks 
+public enum PipelineFailureMode
+{
+	FailPipeline,
+	SkipDependentTasks
 }

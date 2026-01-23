@@ -1,6 +1,6 @@
-﻿namespace Services;
+﻿namespace TaskFactory.Common;
 
-public class CopyTaskDefinition<TSource, TTarget>
+public class CopyTableDefinition<TSource, TTarget>
 {
 	// Source configuration
 	public required string SourceConnectionString { get; set; }

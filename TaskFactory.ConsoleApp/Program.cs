@@ -7,6 +7,7 @@ using TaskFactory.ConsoleApp;
 IServiceCollection services = new ServiceCollection();
 
 TaskFactory.Bootstrapper.Initialize(services);
+TaskFactory.Common.Bootstrapper.Initialize(services);
 TaskFactory.ConsoleApp.Bootstrapper.Initialize(services);
 
 IServiceProvider provider = services.BuildServiceProvider();

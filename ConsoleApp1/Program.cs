@@ -1,4 +1,5 @@
-﻿using DataAccess;
+﻿using ConsoleApp1.Data;
+using DataAccess;
 
 // Initialize provider
 IBulkUpsertProvider pg_provider = new PostgresBulkProvider(

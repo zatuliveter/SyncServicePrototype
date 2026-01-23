@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-namespace TaskFactory;
+namespace TaskFactory.Common;
 
 public static class Bootstrapper
 {
 	public static void Initialize(this IServiceCollection container)
 	{
 		_ = container
-			.AddSingleton<IPipelineValidator, PipelineValidator>()
-			.AddTransient<IPipelineRunner, PipelineRunner>();
+			.AddTransient(typeof(CopyTableTask<,>));
 	}
 }

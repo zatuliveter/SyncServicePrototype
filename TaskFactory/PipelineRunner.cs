@@ -25,8 +25,8 @@ public sealed class PipelineRunner(
 		_logger.Information("{pipelineName}: {Status}", pipeline.Name, "Started");
 		_validator.Validate(pipeline);
 
-		PipelineContext context = new() 
-		{ 
+		PipelineContext context = new()
+		{
 			PipelineName = pipeline.Name,
 			StartTime = DateTimeOffset.UtcNow
 		};

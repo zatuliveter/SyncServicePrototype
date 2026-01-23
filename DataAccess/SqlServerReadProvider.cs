@@ -14,7 +14,7 @@ public class SqlServerReadProvider(string connStr) : IDataReadProvider
 		CommandType commandType = CommandType.Text)
 	{
 		using SqlConnection conn = new SqlConnection(_connectionString);
-		
+
 		// Dapper works with any IDbConnection
 		return await conn.QueryAsync<T>(
 			sql,

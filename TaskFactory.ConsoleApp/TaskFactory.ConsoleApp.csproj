@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaskFactory\TaskFactory.csproj" />
+    <ProjectReference Include="..\Services\TaskFactory.Common.csproj" />
   </ItemGroup>
 
 </Project>

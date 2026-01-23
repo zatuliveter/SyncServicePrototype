@@ -1,5 +1,4 @@
-﻿
-namespace DataAccess;
+﻿namespace ConsoleApp1.Data;
 
 public static class SampleData
 {
