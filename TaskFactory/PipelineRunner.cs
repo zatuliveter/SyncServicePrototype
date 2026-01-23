@@ -22,10 +22,14 @@ public sealed class PipelineRunner(
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(parallelTaskCount);
 
-		_logger.Information("Validating pipeline {pipelineName}.", pipeline.Name);
+		_logger.Information("{pipelineName}: {Status}", pipeline.Name, "Started");
 		_validator.Validate(pipeline);
 
-		PipelineContext context = new();
+		PipelineContext context = new() 
+		{ 
+			PipelineName = pipeline.Name,
+			StartTime = DateTimeOffset.UtcNow
+		};
 		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 		context.PipelineCancellation = cts.Token;
 
@@ -48,7 +52,7 @@ public sealed class PipelineRunner(
 					return node;
 
 				node.Status = TaskExecutionStatus.Running;
-				_logger.Information("Starting task {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
 
 				object? task = _services.GetService(node.Item.TaskType);
 
@@ -72,12 +76,12 @@ public sealed class PipelineRunner(
 				).ConfigureAwait(false);
 
 				node.Status = TaskExecutionStatus.Success;
-				_logger.Information("Task completed {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
 			}
 			catch (Exception ex)
 			{
 				node.Status = TaskExecutionStatus.Failed;
-				_logger.Information(ex, "Task failed {pipelineName}.{taskId}", pipeline.Name, node.Item.Id);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
 
 				errors[node.Item.Id] = ex;
 

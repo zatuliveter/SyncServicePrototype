@@ -12,8 +12,8 @@ public abstract class TaskBase<TParams> : ITask
 			);
 		}
 
-		return ExecuteAsync(typedParams, context, ct);
+		return ExecuteAsync(typedParams, taskId, context, ct);
 	}
 
-	protected abstract Task ExecuteAsync(TParams parameters, IPipelineContext context, CancellationToken ct);
+	protected abstract Task ExecuteAsync(TParams parameters, string taskId, IPipelineContext context, CancellationToken ct);
 }

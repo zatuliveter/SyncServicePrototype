@@ -5,9 +5,14 @@ namespace TaskFactory;
 public class CopyData (ILogger logger)
 	: TaskBase<CopyDataDefinition>
 {
-	protected override Task ExecuteAsync(CopyDataDefinition args, IPipelineContext context, CancellationToken ct)
+	private readonly ILogger _logger = logger.ForContext<CopyData>();
+
+	protected override async Task ExecuteAsync(CopyDataDefinition args, string taskId, IPipelineContext context, CancellationToken ct)
 	{
-		logger.Information("Copying from {SourceTable}", args.SourceTableName);
-		return Task.CompletedTask;
+		_logger.BindProperty("PipelineContext", context, true, out _);
+
+		_logger.Information("{pipelineName}.{taskId}: Loading orders...", context.PipelineName, taskId);
+
+		await Task.Delay(new Random().Next(3000), ct);
 	}
 }

@@ -13,8 +13,7 @@ public static class Bootstrapper
 
 		_ = services
 			.AddSingleton<ILogger>(logger)
-			.AddTransient<CopyData>()
-			.AddTransient<SendEmailTask>()
-			.AddTransient<CustomLoadOrdersTask>();
+			.AddSingleton<SendEmailTask>()
+			.AddSingleton<CustomLoadOrdersTask>();
 	}
 }
