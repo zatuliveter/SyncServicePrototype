@@ -2,5 +2,5 @@
 
 public interface IPipelineValidator
 {
-	void Validate(IPipeline pipeline);
+	void Validate(PipelineGroup pipeline);
 }

@@ -9,7 +9,7 @@ internal class GroupTask
 {
 	protected override Task ExecuteAsync(GroupTaskParams parameters, string taskId, IPipelineContext context, CancellationToken ct)
 	{
-		Pipeline subPipeline = new(){ Name = $"{context.PipelineName}.{taskId}", Items = parameters.Items };
+		PipelineGroup subPipeline = new(id: $"{context.PipelineName}.{taskId}", items: parameters.Items);
 		return pipelineRunner.RunAsync(subPipeline, parameters.PipelineParameters,ct);
 	}
 }

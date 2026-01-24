@@ -6,10 +6,10 @@ namespace TaskFactory.ConsoleApp.Pipelines;
 
 public static class Pipelines 
 {
-	public static readonly IPipeline DailyProcessing = new Pipeline()
-	{
-		Name = "DailyProcessing",		
-		Items = [
+	public static readonly PipelineGroup DailyProcessing = new(	
+		id: "DailyProcessing",
+		runParams: new RunParameters(ParallelTaskCount: 10, FailureMode: PipelineFailureMode.FailPipeline),
+		items: [
 			new PipelineItem<SendEmailTask, SendEmailParams>(
 				id: "email_start",
 				parameters: new SendEmailParams("test@test.com")
@@ -42,5 +42,5 @@ public static class Pipelines
 				dependsOn: ["load_products", "load_orders"]
 			)
 		]
-	};
+	);
 }

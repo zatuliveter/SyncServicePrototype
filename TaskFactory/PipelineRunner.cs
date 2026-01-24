@@ -14,26 +14,26 @@ public sealed class PipelineRunner(
 	private readonly ILogger _logger = logger;
 
 	public async Task<PipelineRunResult> RunAsync(
-		IPipeline pipeline,
+		PipelineGroup pipelineGroup,
 		RunParameters pipelineParameters,
 		CancellationToken ct
 	)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pipelineParameters.ParallelTaskCount);
 
-		_logger.Information("{pipelineName}: {Status}", pipeline.Name, "Started");
-		_validator.Validate(pipeline);
+		_logger.Information("{pipelineName}: {Status}", pipelineGroup.Id, "Started");
+		_validator.Validate(pipelineGroup);
 
 		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
 		PipelineContext pipelineContext = new()
 		{
-			PipelineName = pipeline.Name,
+			PipelineName = pipelineGroup.Id,
 			StartTime = DateTimeOffset.UtcNow,
 			PipelineCancellation = cts.Token
 		};
 
-		Dictionary<string, TaskNode> nodes = BuildGraph(pipeline);
+		Dictionary<string, TaskNode> nodes = BuildGraph(pipelineGroup);
 		ConcurrentDictionary<string, Exception> errors = new(StringComparer.OrdinalIgnoreCase);
 
 		ConcurrentQueue<TaskNode> readyQueue = new(
@@ -52,7 +52,7 @@ public sealed class PipelineRunner(
 					return node;
 
 				node.Status = TaskExecutionStatus.Running;
-				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipelineGroup.Id, node.Item.Id, node.Status);
 
 				object? task = _services.GetService(node.Item.TaskType);
 
@@ -76,12 +76,12 @@ public sealed class PipelineRunner(
 				).ConfigureAwait(false);
 
 				node.Status = TaskExecutionStatus.Success;
-				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipelineGroup.Id, node.Item.Id, node.Status);
 			}
 			catch (Exception ex)
 			{
 				node.Status = TaskExecutionStatus.Failed;
-				_logger.Information("{pipelineName}.{taskId}: {Status}", pipeline.Name, node.Item.Id, node.Status);
+				_logger.Information("{pipelineName}.{taskId}: {Status}", pipelineGroup.Id, node.Item.Id, node.Status);
 
 				errors[node.Item.Id] = ex;
 
@@ -186,7 +186,7 @@ public sealed class PipelineRunner(
 		};
 	}
 
-	private static Dictionary<string, TaskNode> BuildGraph(IPipeline pipeline)
+	private static Dictionary<string, TaskNode> BuildGraph(PipelineGroup pipeline)
 	{
 		Dictionary<string, TaskNode> nodes = pipeline.Items.ToDictionary(
 			static x => x.Id,

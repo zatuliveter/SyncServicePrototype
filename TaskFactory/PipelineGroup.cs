@@ -3,6 +3,7 @@ namespace TaskFactory;
 
 public record PipelineGroup : PipelineItemBase
 {
+	internal IReadOnlyCollection<PipelineItemBase> Items;
 	public PipelineGroup(
 		string id,
 		IReadOnlyCollection<PipelineItemBase> items,
@@ -16,5 +17,6 @@ public record PipelineGroup : PipelineItemBase
 			parameters: new GroupTaskParams(Items: items, PipelineParameters: runParams ?? RunParameters.Default)
 		)
 	{
+		Items = items;
 	}
 }

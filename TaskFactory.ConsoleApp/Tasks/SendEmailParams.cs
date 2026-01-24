@@ -4,13 +4,13 @@ public record SendEmailParams
 {
 	public string[] Emails { get; init; }
 
-	public SendEmailParams(string firstEmail, params string[] otherEmails)
+	public SendEmailParams(string email, params string[] emails)
 	{
-		if (string.IsNullOrWhiteSpace(firstEmail))
+		if (string.IsNullOrWhiteSpace(email))
 		{
-			throw new ArgumentException("The first email cannot be empty.", nameof(firstEmail));
+			throw new ArgumentException("The first email cannot be empty.", nameof(email));
 		}
 
-		Emails = [firstEmail, .. otherEmails];
+		Emails = [email, .. emails];
 	}
 }
