@@ -15,12 +15,11 @@ public sealed class PipelineRunner(
 
 	public async Task<PipelineRunResult> RunAsync(
 		IPipeline pipeline,
-		int parallelTaskCount,
-		PipelineFailureMode failureMode,
+		RunParameters pipelineParameters,
 		CancellationToken ct
 	)
 	{
-		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(parallelTaskCount);
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pipelineParameters.ParallelTaskCount);
 
 		_logger.Information("{pipelineName}: {Status}", pipeline.Name, "Started");
 		_validator.Validate(pipeline);
@@ -42,7 +41,7 @@ public sealed class PipelineRunner(
 		);
 
 		List<Task<TaskNode>> running = [];
-		SemaphoreSlim semaphore = new(parallelTaskCount);
+		SemaphoreSlim semaphore = new(pipelineParameters.ParallelTaskCount);
 
 		async Task<TaskNode> RunNodeAsync(TaskNode node)
 		{
@@ -86,7 +85,7 @@ public sealed class PipelineRunner(
 
 				errors[node.Item.Id] = ex;
 
-				if (failureMode == PipelineFailureMode.FailPipeline)
+				if (pipelineParameters.FailureMode == PipelineFailureMode.FailPipeline)
 				{
 					cts.Cancel();
 				}
@@ -132,7 +131,7 @@ public sealed class PipelineRunner(
 		void OnNodeFinished(TaskNode finished)
 		{
 			if (finished.Status == TaskExecutionStatus.Failed &&
-				failureMode == PipelineFailureMode.SkipDependentTasks)
+				pipelineParameters.FailureMode == PipelineFailureMode.SkipDependentTasks)
 			{
 				SkipDependentsRecursively(finished);
 				return;

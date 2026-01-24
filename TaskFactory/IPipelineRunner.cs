@@ -4,8 +4,7 @@ public interface IPipelineRunner
 {
 	Task<PipelineRunResult> RunAsync(
 			IPipeline pipeline,
-			int parallelTaskCount,
-			PipelineFailureMode failureMode,
+			RunParameters pipelineParameters,
 			CancellationToken ct
 		);
 }

@@ -7,6 +7,7 @@ public static class Bootstrapper
 	{
 		_ = container
 			.AddSingleton<IPipelineValidator, PipelineValidator>()
-			.AddTransient<IPipelineRunner, PipelineRunner>();
+			.AddTransient<IPipelineRunner, PipelineRunner>()
+			.AddTransient<GroupTask>();
 	}
 }

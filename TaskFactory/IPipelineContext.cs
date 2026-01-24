@@ -6,7 +6,7 @@ public interface IPipelineContext
 
 	Guid RunId { get; }
 
-	public DateTimeOffset StartTime { get; }
+	DateTimeOffset StartTime { get; }
 
 	CancellationToken PipelineCancellation { get; }
 }

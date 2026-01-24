@@ -4,34 +4,43 @@ using TaskFactory.ConsoleApp.Tasks;
 
 namespace TaskFactory.ConsoleApp.Pipelines;
 
-
-public class DailyProcessingPipeline : IPipeline
+public static class Pipelines 
 {
-	public string Name => "DailyProcessing";
+	public static readonly IPipeline DailyProcessing = new Pipeline()
+	{
+		Name = "DailyProcessing",		
+		Items = [
+			new PipelineItem<SendEmailTask, SendEmailParams>(
+				id: "email_start",
+				parameters: new SendEmailParams("test@test.com")
+			),
 
-	public IReadOnlyCollection<PipelineItemBase> Items { get; } =
-	[
-		new PipelineItem<SendEmailTask, SendEmailParams>(
-			id: "email_start",
-			parameters: new SendEmailParams("test@test.com")
-		),
+			PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition),
 
-		PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition),
+			new PipelineGroup(
+				id: "group1", 
+				dependsOn: ["load_products", "email_start"], 
+				runParams: new RunParameters(ParallelTaskCount: 3, FailureMode: PipelineFailureMode.FailPipeline), 
+				items: [
+					new PipelineItem<CopyDataDemo>("data1"),
+					new PipelineItem<CopyDataDemo>("data2"),
+					new PipelineItem<CopyDataDemo>("data3", dependsOn: ["data1"]),
+				]
+			),
 
-		new PipelineItem<CopyDataDemo>("load_data1", dependsOn: ["load_products", "email_start"]),
-		new PipelineItem<CopyDataDemo>("load_data2", dependsOn: ["load_products"]),
-		new PipelineItem<CopyDataDemo>("load_data3", dependsOn: ["load_products"]),
+			new PipelineGroup(id: "group2", dependsOn: ["email_start"], items: [
+				new PipelineItem<CopyDataDemo>("load1"),
+				new PipelineItem<CopyDataDemo>("load2"),
+				new PipelineItem<CopyDataDemo>("load3")
+			]),
 
-		new PipelineItem<CopyDataDemo>("load1"),
-		new PipelineItem<CopyDataDemo>("load2"),
-		new PipelineItem<CopyDataDemo>("load3"),
+			new PipelineItem<CustomLoadOrdersTask>("load_orders", dependsOn: ["load_products"]),
 
-		new PipelineItem<CustomLoadOrdersTask>("load_orders", dependsOn: ["load_products"]),
-
-		new PipelineItem<SendEmailTask, SendEmailParams>(
-			id: "email_admin",
-			parameters: new SendEmailParams("admin@test.com"),
-			dependsOn: ["load_products", "load_orders"]
-		)
-	];
+			new PipelineItem<SendEmailTask, SendEmailParams>(
+				id: "email_admin",
+				parameters: new SendEmailParams("admin@test.com"),
+				dependsOn: ["load_products", "load_orders"]
+			)
+		]
+	};
 }

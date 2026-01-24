@@ -18,12 +18,9 @@ IServiceProvider provider = services.BuildServiceProvider();
 IPipelineRunner runner = provider.GetRequiredService<IPipelineRunner>();
 ILogger logger = provider.GetRequiredService<ILogger>();
 
-IPipeline pipeline = new DailyProcessingPipeline();
-
 PipelineRunResult result = await runner.RunAsync(
-	pipeline,
-	parallelTaskCount: 10,
-	PipelineFailureMode.SkipDependentTasks,
+	Pipelines.DailyProcessing,
+	new RunParameters(ParallelTaskCount: 10, FailureMode: PipelineFailureMode.SkipDependentTasks),
 	CancellationToken.None
 );
 
