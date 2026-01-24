@@ -12,4 +12,16 @@ public sealed class PipelineRunResult
 
 	public required IReadOnlyDictionary<string, TaskRunResult> Tasks { get; init; }
 		= new Dictionary<string, TaskRunResult>();
+
+
+	public void ThrowOnError()
+	{
+		if (!IsSuccess)
+		{
+			throw new AggregateException(
+				"Pipeline failed",
+				Tasks.Where(t => t.Value.Status == TaskExecutionStatus.Failed).Select(t => t.Value.Error!)
+			);
+		}
+	}
 }

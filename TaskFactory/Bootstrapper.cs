@@ -8,6 +8,6 @@ public static class Bootstrapper
 		_ = container
 			.AddSingleton<IPipelineValidator, PipelineValidator>()
 			.AddTransient<IPipelineRunner, PipelineRunner>()
-			.AddTransient<PipelineTask>();
+			.AddTransient<SubPipelineTask>();
 	}
 }

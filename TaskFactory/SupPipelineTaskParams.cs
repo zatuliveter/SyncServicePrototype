@@ -1,7 +1,7 @@
 ﻿
 namespace TaskFactory;
 
-internal record PipelineTaskParams(
+internal record SupPipelineTaskParams(
 	RunParameters RunParameters,
 	IReadOnlyCollection<PipelineItemBase> Items
 );

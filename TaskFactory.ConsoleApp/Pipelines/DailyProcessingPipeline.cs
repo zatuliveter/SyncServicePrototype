@@ -8,7 +8,7 @@ public static class Pipelines
 {
 	public static readonly Pipeline DailyProcessing = new(	
 		id: "daily",
-		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.FailPipeline),
+		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.ThrowException),
 		items: [
 			new PipelineItem<SendEmailTask, SendEmailParams>(
 				id: "email_start",
@@ -31,7 +31,13 @@ public static class Pipelines
 			new Pipeline(id: "group2", dependsOn: ["email_start"], items: [
 				new PipelineItem<CopyDataDemo>("load1"),
 				new PipelineItem<CopyDataDemo>("load2"),
-				new PipelineItem<CopyDataDemo>("load3")
+				new PipelineItem<CopyDataDemo>("load3"),
+				new PipelineItem<CopyDataDemo>("load4"),
+				new PipelineItem<CopyDataDemo>("load5"),
+				new PipelineItem<CopyDataDemo>("load6"),
+				new PipelineItem<CopyDataDemo>("load7"),
+				new PipelineItem<CopyDataDemo>("load8"),
+				new PipelineItem<CopyDataDemo>("load9")
 			]),
 
 			new PipelineItem<CustomLoadOrdersTask>("load_orders", dependsOn: ["load_products"]),

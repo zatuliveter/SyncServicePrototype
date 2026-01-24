@@ -84,6 +84,12 @@ public sealed class PipelineRunner(
 
 				errors[node.Item.Id] = ex;
 
+				if (pipeline.RunParameters.FailureMode == PipelineFailureMode.ThrowException)
+				{
+					cts.Cancel();
+					throw;
+				}
+
 				if (pipeline.RunParameters.FailureMode == PipelineFailureMode.FailPipeline)
 				{
 					cts.Cancel();

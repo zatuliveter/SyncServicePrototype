@@ -24,13 +24,7 @@ PipelineRunResult result = await runner.RunAsync(
 );
 
 
-if (!result.IsSuccess)
-{
-	throw new AggregateException(
-		"Pipeline failed",
-		result.Tasks.Where(t => t.Value.Status == TaskExecutionStatus.Failed).Select(t => t.Value.Error!)
-	);
-}
+result.ThrowOnError();
 
 logger.Information("Run duration: {duration}", result.Duration);
 logger.Information("Done.");
