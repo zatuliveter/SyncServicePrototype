@@ -10,13 +10,13 @@ public abstract record PipelineItemBase
 	protected PipelineItemBase(
 		string id,
 		Type taskType,
-		IReadOnlyCollection<string> dependsOn,
+		IReadOnlyCollection<string>? dependsOn,
 		object? parameters
 	)
 	{
 		Id = id;
 		TaskType = taskType;
-		DependsOn = dependsOn;
+		DependsOn = dependsOn ?? [];
 		Parameters = parameters;
 	}
 }

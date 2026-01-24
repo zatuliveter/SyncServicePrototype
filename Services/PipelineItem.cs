@@ -6,7 +6,7 @@ public static class PipelineItem
 		CopyTable<TSource, TTarget>(
 			string id,
 			CopyTableDefinition<TSource, TTarget> parameters,
-			params string[] dependsOn)
+			params string[]? dependsOn)
 		where TSource : class
 		where TTarget : class
 	{

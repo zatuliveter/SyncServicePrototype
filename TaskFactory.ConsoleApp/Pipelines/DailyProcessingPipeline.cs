@@ -16,15 +16,15 @@ public class DailyProcessingPipeline : IPipeline
 			parameters: new SendEmailParams("test@test.com")
 		),
 
-		PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition, dependsOn: []),
+		PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition),
 
 		new PipelineItem<CopyDataDemo>("load_data1", dependsOn: ["load_products", "email_start"]),
 		new PipelineItem<CopyDataDemo>("load_data2", dependsOn: ["load_products"]),
 		new PipelineItem<CopyDataDemo>("load_data3", dependsOn: ["load_products"]),
 
-		new PipelineItem<CopyDataDemo>("load1", dependsOn: []),
-		new PipelineItem<CopyDataDemo>("load2", dependsOn: []),
-		new PipelineItem<CopyDataDemo>("load3", dependsOn: []),
+		new PipelineItem<CopyDataDemo>("load1"),
+		new PipelineItem<CopyDataDemo>("load2"),
+		new PipelineItem<CopyDataDemo>("load3"),
 
 		new PipelineItem<CustomLoadOrdersTask>("load_orders", dependsOn: ["load_products"]),
 

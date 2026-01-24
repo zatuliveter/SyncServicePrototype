@@ -6,7 +6,7 @@ public sealed record PipelineItem<TTask, TParams> : PipelineItemBase
 	public PipelineItem(
 		string id,
 		TParams parameters,
-		params string[] dependsOn
+		string[]? dependsOn = null
 	)
 		: base(id, typeof(TTask), dependsOn, parameters)
 	{
@@ -19,7 +19,7 @@ public sealed record PipelineItem<TTask> : PipelineItemBase
 {
 	public PipelineItem(
 		string id,
-		params string[] dependsOn
+		string[]? dependsOn = null
 	)
 		: base(id, typeof(TTask), dependsOn, null)
 	{

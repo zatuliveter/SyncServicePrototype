@@ -14,7 +14,7 @@ TaskFactory.ConsoleApp.Bootstrapper.Initialize(services);
 IServiceProvider provider = services.BuildServiceProvider();
 
 
-// DI container resolves all constructor arguments automatically
+
 IPipelineRunner runner = provider.GetRequiredService<IPipelineRunner>();
 ILogger logger = provider.GetRequiredService<ILogger>();
 
