@@ -3,7 +3,7 @@
 
 public sealed class PipelineValidator : IPipelineValidator
 {
-	public void Validate(PipelineGroup pipeline)
+	public void Validate(Pipeline pipeline)
 	{
 		if (pipeline.Items.Count == 0)
 			throw new InvalidOperationException("Pipeline contains no items.");

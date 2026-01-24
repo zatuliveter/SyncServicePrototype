@@ -20,7 +20,6 @@ ILogger logger = provider.GetRequiredService<ILogger>();
 
 PipelineRunResult result = await runner.RunAsync(
 	Pipelines.DailyProcessing,
-	new RunParameters(ParallelTaskCount: 10, FailureMode: PipelineFailureMode.SkipDependentTasks),
 	CancellationToken.None
 );
 

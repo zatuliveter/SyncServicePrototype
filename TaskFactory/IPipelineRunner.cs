@@ -3,8 +3,7 @@
 public interface IPipelineRunner
 {
 	Task<PipelineRunResult> RunAsync(
-			PipelineGroup pipelineGroup,
-			RunParameters pipelineParameters,
+			Pipeline pipelineGroup,
 			CancellationToken ct
 		);
 }

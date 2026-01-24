@@ -1,7 +1,7 @@
 ﻿
 namespace TaskFactory;
 
-public record GroupTaskParams(
-	IReadOnlyCollection<PipelineItemBase> Items,
-	RunParameters PipelineParameters
+internal record GroupTaskParams(
+	RunParameters RunParameters,
+	IReadOnlyCollection<PipelineItemBase> Items
 );

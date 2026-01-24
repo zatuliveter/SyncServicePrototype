@@ -6,9 +6,9 @@ namespace TaskFactory.ConsoleApp.Pipelines;
 
 public static class Pipelines 
 {
-	public static readonly PipelineGroup DailyProcessing = new(	
-		id: "DailyProcessing",
-		runParams: new RunParameters(ParallelTaskCount: 10, FailureMode: PipelineFailureMode.FailPipeline),
+	public static readonly Pipeline DailyProcessing = new(	
+		id: "daily",
+		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.FailPipeline),
 		items: [
 			new PipelineItem<SendEmailTask, SendEmailParams>(
 				id: "email_start",
@@ -17,7 +17,7 @@ public static class Pipelines
 
 			PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition),
 
-			new PipelineGroup(
+			new Pipeline(
 				id: "group1", 
 				dependsOn: ["load_products", "email_start"], 
 				runParams: new RunParameters(ParallelTaskCount: 3, FailureMode: PipelineFailureMode.FailPipeline), 
@@ -28,7 +28,7 @@ public static class Pipelines
 				]
 			),
 
-			new PipelineGroup(id: "group2", dependsOn: ["email_start"], items: [
+			new Pipeline(id: "group2", dependsOn: ["email_start"], items: [
 				new PipelineItem<CopyDataDemo>("load1"),
 				new PipelineItem<CopyDataDemo>("load2"),
 				new PipelineItem<CopyDataDemo>("load3")

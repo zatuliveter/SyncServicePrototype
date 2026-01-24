@@ -1,7 +1,7 @@
 ﻿
 namespace TaskFactory;
 
-internal class GroupTask 
+internal class PipelineTask
 	(
 		IPipelineRunner pipelineRunner
 	)
@@ -9,7 +9,11 @@ internal class GroupTask
 {
 	protected override Task ExecuteAsync(GroupTaskParams parameters, string taskId, IPipelineContext context, CancellationToken ct)
 	{
-		PipelineGroup subPipeline = new(id: $"{context.PipelineName}.{taskId}", items: parameters.Items);
-		return pipelineRunner.RunAsync(subPipeline, parameters.PipelineParameters,ct);
+		Pipeline pipeline = new(
+			id: $"{context.PipelineName}.{taskId}",
+			runParams: parameters.RunParameters,
+			items: parameters.Items
+		);
+		return pipelineRunner.RunAsync(pipeline, ct);
 	}
 }
