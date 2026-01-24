@@ -5,9 +5,9 @@ internal class PipelineTask
 	(
 		IPipelineRunner pipelineRunner
 	)
-	: TaskBase<GroupTaskParams>
+	: TaskBase<PipelineTaskParams>
 {
-	protected override Task ExecuteAsync(GroupTaskParams parameters, string taskId, IPipelineContext context, CancellationToken ct)
+	protected override Task ExecuteAsync(PipelineTaskParams parameters, string taskId, IPipelineContext context, CancellationToken ct)
 	{
 		Pipeline pipeline = new(
 			id: $"{context.PipelineName}.{taskId}",
