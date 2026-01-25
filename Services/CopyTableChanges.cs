@@ -14,9 +14,9 @@ public class CopyTableChangesTask<TSource, TTarget>
 	private readonly ILogger _logger = logger.ForContext<CopyTableChangesTask<TSource, TTarget>>();
 
 	protected override async Task ExecuteAsync(
-		CopyTableChangesDefinition<TSource, TTarget> definition, 
-		string taskId, 
-		IPipelineContext context, 
+		CopyTableChangesDefinition<TSource, TTarget> definition,
+		string taskId,
+		IPipelineContext context,
 		CancellationToken ct
 	)
 	{
@@ -34,13 +34,13 @@ public class CopyTableChangesTask<TSource, TTarget>
 			from {definition.SourceTable}
 			"""
 		);
-		
+
 		if (lastModified != null)
 		{
 			query.AppendLine($"where {definition.ModificationTimeColumn} > @lastModified");
 		}
 
-		query.AppendLine($"order by { definition.ModificationTimeColumn})");
+		query.AppendLine($"order by {definition.ModificationTimeColumn})");
 
 		IEnumerable<TSource> sourceData = await definition.SourceReader.QueryAsync<TSource>(
 			query.ToString(),

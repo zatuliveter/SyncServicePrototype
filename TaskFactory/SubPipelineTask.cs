@@ -5,10 +5,10 @@ internal class SubPipelineTask
 	(
 		IPipelineRunner pipelineRunner
 	)
-	: TaskBase<SupPipelineTaskParams>
+	: TaskBase<SubPipelineTaskParams>
 {
 	protected override async Task ExecuteAsync(
-		SupPipelineTaskParams parameters,
+		SubPipelineTaskParams parameters,
 		string taskId,
 		IPipelineContext context,
 		CancellationToken ct

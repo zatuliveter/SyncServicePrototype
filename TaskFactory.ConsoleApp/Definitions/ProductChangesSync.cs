@@ -6,7 +6,7 @@ namespace TaskFactory.ConsoleApp.Definitions;
 public static class ProductChangesSync
 {
 	static readonly string sourceConnectionString = "Server=.;Database=sync_demo;Integrated Security=True;TrustServerCertificate=True;";
-	
+
 	public static readonly CopyTableChangesDefinition<ProductDto, ProductDto> Definition = new()
 	{
 		SourceReader = new SqlServerReader(sourceConnectionString),

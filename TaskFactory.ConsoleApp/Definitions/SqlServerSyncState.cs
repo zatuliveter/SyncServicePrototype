@@ -25,7 +25,8 @@ internal sealed class SqlServerSyncState<T>(string name, string connectionString
 		await using SqlConnection cnn = new(_connectionString);
 		string? json = await cnn.QuerySingleOrDefaultAsync<string>(
 			sql,
-			new {
+			new
+			{
 				name = new DbString
 				{
 					Value = name,

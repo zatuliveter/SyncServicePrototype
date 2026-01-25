@@ -1,6 +1,6 @@
 ﻿namespace TaskFactory.Common;
 
-public record CopyTablePipelineItem<TSource, TTarget> : PipelineItemBase
+public record CopyTablePipelineItem<TSource, TTarget> : PipelineItem
 	where TSource : class
 	where TTarget : class
 {

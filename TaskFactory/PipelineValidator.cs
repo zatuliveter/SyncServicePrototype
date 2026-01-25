@@ -20,10 +20,10 @@ public sealed class PipelineValidator : IPipelineValidator
 				"Duplicate task ids: " + string.Join(", ", duplicates)
 			);
 
-		Dictionary<string, PipelineItemBase> itemsById = pipeline.Items.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+		Dictionary<string, PipelineItem> itemsById = pipeline.Items.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
 		// 2. All dependencies must exist
-		foreach (PipelineItemBase item in pipeline.Items)
+		foreach (PipelineItem item in pipeline.Items)
 		{
 			foreach (string dep in item.DependsOn)
 			{
@@ -40,7 +40,7 @@ public sealed class PipelineValidator : IPipelineValidator
 		HashSet<string> visited = new(StringComparer.OrdinalIgnoreCase);
 		HashSet<string> stack = new(StringComparer.OrdinalIgnoreCase);
 
-		foreach (PipelineItemBase item in pipeline.Items)
+		foreach (PipelineItem item in pipeline.Items)
 		{
 			Visit(item.Id);
 		}
@@ -56,7 +56,7 @@ public sealed class PipelineValidator : IPipelineValidator
 			visited.Add(id);
 			stack.Add(id);
 
-			PipelineItemBase node = itemsById[id];
+			PipelineItem node = itemsById[id];
 			foreach (string dep in node.DependsOn)
 			{
 				Visit(dep);

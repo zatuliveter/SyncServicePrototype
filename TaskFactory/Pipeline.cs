@@ -1,14 +1,14 @@
 ﻿
 namespace TaskFactory;
 
-public record Pipeline : PipelineItemBase
+public record Pipeline : PipelineItem
 {
-	internal IReadOnlyCollection<PipelineItemBase> Items;
-	internal RunParameters RunParameters => ((SupPipelineTaskParams)Parameters!).RunParameters;
+	internal IReadOnlyCollection<PipelineItem> Items;
+	internal RunParameters RunParameters => ((SubPipelineTaskParams)Parameters!).RunParameters;
 
 	public Pipeline(
 		string id,
-		IReadOnlyCollection<PipelineItemBase> items,
+		IReadOnlyCollection<PipelineItem> items,
 		RunParameters? runParams = null,
 		string[]? dependsOn = null
 	)
@@ -16,7 +16,7 @@ public record Pipeline : PipelineItemBase
 			id,
 			typeof(SubPipelineTask),
 			dependsOn,
-			parameters: new SupPipelineTaskParams(Items: items, RunParameters: runParams ?? RunParameters.Default)
+			parameters: new SubPipelineTaskParams(Items: items, RunParameters: runParams ?? RunParameters.Default)
 		)
 	{
 		Items = items;

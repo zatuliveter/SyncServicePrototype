@@ -1,27 +1,22 @@
 ﻿namespace TaskFactory;
 
-public sealed record PipelineItem<TTask, TParams> : PipelineItemBase
-	where TTask : TaskBase<TParams>
+public record PipelineItem
 {
+	public string Id { get; }
+	public Type TaskType { get; }
+	public IReadOnlyCollection<string> DependsOn { get; }
+	public object? Parameters { get; }
+
 	public PipelineItem(
 		string id,
-		TParams parameters,
-		string[]? dependsOn = null
+		Type taskType,
+		IReadOnlyCollection<string>? dependsOn,
+		object? parameters
 	)
-		: base(id, typeof(TTask), dependsOn, parameters)
 	{
-	}
-}
-
-
-public sealed record PipelineItem<TTask> : PipelineItemBase
-	where TTask : ITask
-{
-	public PipelineItem(
-		string id,
-		string[]? dependsOn = null
-	)
-		: base(id, typeof(TTask), dependsOn, null)
-	{
+		Id = id;
+		TaskType = taskType;
+		DependsOn = dependsOn ?? [];
+		Parameters = parameters;
 	}
 }
