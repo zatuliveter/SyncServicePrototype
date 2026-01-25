@@ -5,7 +5,7 @@ namespace TaskFactory.ConsoleApp.Definitions;
 
 public static class ProductSync
 {
-	public static readonly CopyTableDefinition<ProductDto, ProductDto> Definition = new()
+	public static readonly CopyTableParameters<ProductDto, ProductDto> Params = new()
 	{
 		SourceReader = new SqlServerReader("Server=.;Database=sync_demo;Integrated Security=True;TrustServerCertificate=True;"),
 		SourceQuery = "SELECT product_id, name, price, stock_count, last_updated FROM dbo.Products",

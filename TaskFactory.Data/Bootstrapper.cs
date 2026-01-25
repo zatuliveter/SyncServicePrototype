@@ -8,6 +8,6 @@ public static class Bootstrapper
 	{
 		_ = container
 			.AddTransient(typeof(CopyTableTask<,>))
-			.AddTransient(typeof(CopyTableChangesTask<,>));
+			.AddTransient(typeof(CopyTableDiffTask<,>));
 	}
 }

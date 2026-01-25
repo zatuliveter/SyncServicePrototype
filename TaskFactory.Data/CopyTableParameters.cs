@@ -2,7 +2,7 @@
 
 namespace TaskFactory.Data;
 
-public class CopyTableDefinition<TSource, TTarget>
+public class CopyTableParameters<TSource, TTarget>
 {
 	// Source configuration
 	public required IDataReader SourceReader { get; init; }

@@ -4,18 +4,22 @@ using System.Data;
 
 namespace DataAccess;
 
-public class SqlServerReader(string connStr) : IDataReader
+public class SqlServerReader : IDataReader
 {
-	private readonly string _connectionString = connStr;
+	private readonly string _connectionString;
+
+	public SqlServerReader(string connStr)
+	{
+		_connectionString = connStr;
+	}
 
 	public async Task<IEnumerable<T>> QueryAsync<T>(
 		string sql,
 		object? parameters = null,
 		CommandType commandType = CommandType.Text)
 	{
-		using SqlConnection conn = new SqlConnection(_connectionString);
+		using SqlConnection conn = new(_connectionString);
 
-		// Dapper works with any IDbConnection
 		return await conn.QueryAsync<T>(
 			sql,
 			parameters,

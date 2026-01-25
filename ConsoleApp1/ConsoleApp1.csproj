@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\Services\TaskFactory.Common.csproj" />
   </ItemGroup>
 
 </Project>

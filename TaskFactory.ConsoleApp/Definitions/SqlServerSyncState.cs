@@ -1,18 +1,26 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Text.Json;
 using TaskFactory.Data;
 
 namespace TaskFactory.ConsoleApp.Definitions;
 
 
-internal sealed class SqlServerSyncState<T>(string name, string connectionString) : ISyncState
+internal sealed class SqlServerSyncState<T> : ISyncState
 {
-	private readonly string _connectionString = connectionString;
+	private readonly string _connectionString;
 	private static readonly JsonSerializerOptions _jsonOptions = new()
 	{
 		PropertyNameCaseInsensitive = true
 	};
+	private readonly string name;
+
+	public SqlServerSyncState(string name, string connectionString)
+	{
+		this.name = name;
+		_connectionString = connectionString;
+	}
 
 	public async Task<object?> GetAsync()
 	{

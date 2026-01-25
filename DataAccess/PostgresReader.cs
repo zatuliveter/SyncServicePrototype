@@ -11,8 +11,6 @@ public class PostgresReader : IDataReader
 	public PostgresReader(string connStr)
 	{
 		_connectionString = connStr;
-		// Global setting to handle snake_case columns in Postgres
-		DefaultTypeMap.MatchNamesWithUnderscores = true;
 	}
 
 	public async Task<IEnumerable<T>> QueryAsync<T>(

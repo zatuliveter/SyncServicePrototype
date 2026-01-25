@@ -6,13 +6,13 @@ public class CopyTableTask<TSource, TTarget>
 	(
 		ILogger logger
 	)
-	: TaskBase<CopyTableDefinition<TSource, TTarget>>
+	: TaskBase<CopyTableParameters<TSource, TTarget>>
 		where TSource : class
 		where TTarget : class
 {
 	private readonly ILogger _logger = logger.ForContext<CopyTableTask<TSource, TTarget>>();
 
-	protected override async Task ExecuteAsync(CopyTableDefinition<TSource, TTarget> definition, string taskId, IPipelineContext context, CancellationToken ct)
+	protected override async Task ExecuteAsync(CopyTableParameters<TSource, TTarget> definition, string taskId, IPipelineContext context, CancellationToken ct)
 	{
 		_logger.Information("{pipelineName}.{taskId}: Extracting data from Source.", context.PipelineName, taskId);
 		IEnumerable<TSource> sourceData = await definition.SourceReader.QueryAsync<TSource>(

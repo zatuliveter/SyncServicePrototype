@@ -11,13 +11,14 @@ public static class Pipelines
 		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.ThrowException),
 		p =>
 		{
-
 			p.AddTask<SendEmailTask, SendEmailParams>(
 				id: "email_start",
 				parameters: new SendEmailParams("test@test.com")
 			);
 
-			p.AddCopyTableTask("load_products", ProductSync.Definition);
+			//p.AddCopyTableTask(id: "load_products", ProductSync.Params);
+
+			p.AddCopyTableDiffTask(id: "load_products", ProductDiffParameters.Params);
 
 			p.AddPipeline(
 				id: "group1",

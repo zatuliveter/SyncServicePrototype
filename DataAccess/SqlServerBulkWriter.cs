@@ -1,4 +1,5 @@
 ﻿
+using Dapper;
 using FastMember;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -6,9 +7,14 @@ using System.Data;
 namespace DataAccess;
 
 
-public class SqlServerBulkWriter(string connStr) : IDataWriter
+public class SqlServerBulkWriter : IDataWriter
 {
-	private readonly string _connectionString = connStr;
+	private readonly string _connectionString;
+
+	public SqlServerBulkWriter(string connStr)
+	{
+		_connectionString = connStr;
+	}
 
 	public async Task ExecuteUpsertAsync<T>(
 		string tableName,
