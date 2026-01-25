@@ -21,7 +21,7 @@ public class CopyTableTask<TSource, TTarget>
 		);
 
 		_logger.Information(
-			"{pipelineName}.{taskId}: Mapping data. RowCount={RowCount}", 
+			"{pipelineName}.{taskId}: Mapping data. RowCount={RowCount}",
 			context.PipelineName, taskId, sourceData.Count()
 		);
 		IEnumerable<TTarget> targetData = sourceData.Select(definition.Mapper);

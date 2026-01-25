@@ -4,9 +4,9 @@ using TaskFactory.ConsoleApp.Tasks;
 
 namespace TaskFactory.ConsoleApp.Pipelines;
 
-public static class Pipelines 
+public static class Pipelines
 {
-	public static readonly Pipeline DailyProcessing = new(	
+	public static readonly Pipeline DailyProcessing = new(
 		id: "daily",
 		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.ThrowException),
 		items: [
@@ -18,9 +18,9 @@ public static class Pipelines
 			PipelineItem.CopyTable("load_products", parameters: ProductSync.Definition),
 
 			new Pipeline(
-				id: "group1", 
-				dependsOn: ["load_products", "email_start"], 
-				runParams: new RunParameters(ParallelTaskCount: 3, FailureMode: PipelineFailureMode.FailPipeline), 
+				id: "group1",
+				dependsOn: ["load_products", "email_start"],
+				runParams: new RunParameters(ParallelTaskCount: 3, FailureMode: PipelineFailureMode.FailPipeline),
 				items: [
 					new PipelineItem<CopyDataDemo>("data1"),
 					new PipelineItem<CopyDataDemo>("data2"),

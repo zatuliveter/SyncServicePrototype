@@ -8,9 +8,9 @@ internal class SubPipelineTask
 	: TaskBase<SupPipelineTaskParams>
 {
 	protected override async Task ExecuteAsync(
-		SupPipelineTaskParams parameters, 
-		string taskId, 
-		IPipelineContext context, 
+		SupPipelineTaskParams parameters,
+		string taskId,
+		IPipelineContext context,
 		CancellationToken ct
 	)
 	{

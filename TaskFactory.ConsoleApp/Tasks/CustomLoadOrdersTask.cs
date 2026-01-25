@@ -12,7 +12,7 @@ public class CustomLoadOrdersTask(ILogger logger) : ITask
 	{
 
 		_logger.Information("{pipelineName}.{taskId}: Loading orders...", context.PipelineName, taskId);
-		
+
 		//throw new Exception("Test exception");
 
 		await Task.Delay(1000, ct);

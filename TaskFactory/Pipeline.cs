@@ -13,12 +13,12 @@ public record Pipeline : PipelineItemBase
 		string[]? dependsOn = null
 	)
 		: base(
-			id, 
-			typeof(SubPipelineTask), 
-			dependsOn, 
+			id,
+			typeof(SubPipelineTask),
+			dependsOn,
 			parameters: new SupPipelineTaskParams(Items: items, RunParameters: runParams ?? RunParameters.Default)
 		)
 	{
-		Items = items;		
+		Items = items;
 	}
 }
