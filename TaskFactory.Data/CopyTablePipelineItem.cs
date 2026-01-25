@@ -1,4 +1,4 @@
-﻿namespace TaskFactory.Common;
+﻿namespace TaskFactory.Data;
 
 public record CopyTablePipelineItem<TSource, TTarget> : PipelineItem
 	where TSource : class

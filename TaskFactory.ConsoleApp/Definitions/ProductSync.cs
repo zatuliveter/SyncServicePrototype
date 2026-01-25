@@ -1,5 +1,5 @@
 ﻿using DataAccess;
-using TaskFactory.Common;
+using TaskFactory.Data;
 
 namespace TaskFactory.ConsoleApp.Definitions;
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-namespace TaskFactory.Common;
+
+namespace TaskFactory.Data;
 
 public static class Bootstrapper
 {

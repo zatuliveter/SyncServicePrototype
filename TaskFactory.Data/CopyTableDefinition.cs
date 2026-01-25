@@ -1,6 +1,6 @@
 ﻿using DataAccess;
 
-namespace TaskFactory.Common;
+namespace TaskFactory.Data;
 
 public class CopyTableDefinition<TSource, TTarget>
 {

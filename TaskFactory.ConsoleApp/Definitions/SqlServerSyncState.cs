@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Text.Json;
-using TaskFactory.Common;
+using TaskFactory.Data;
 
 namespace TaskFactory.ConsoleApp.Definitions;
 

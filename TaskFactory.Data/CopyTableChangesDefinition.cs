@@ -1,7 +1,7 @@
 ﻿
 using DataAccess;
 
-namespace TaskFactory.Common;
+namespace TaskFactory.Data;
 
 public class CopyTableChangesDefinition<TSource, TTarget>
 {

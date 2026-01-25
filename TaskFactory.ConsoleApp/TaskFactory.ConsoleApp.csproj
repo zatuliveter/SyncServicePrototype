@@ -9,8 +9,8 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\TaskFactory.Data\TaskFactory.Data.csproj" />
     <ProjectReference Include="..\TaskFactory\TaskFactory.csproj" />
-    <ProjectReference Include="..\Services\TaskFactory.Common.csproj" />
   </ItemGroup>
 
 </Project>

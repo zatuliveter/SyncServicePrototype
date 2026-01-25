@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.Text;
 
-namespace TaskFactory.Common;
+namespace TaskFactory.Data;
 
 public class CopyTableChangesTask<TSource, TTarget>
 	(
@@ -55,7 +55,7 @@ public class CopyTableChangesTask<TSource, TTarget>
 		IEnumerable<TTarget> targetData = sourceData.Select(definition.Mapper);
 
 		_logger.Information("{pipelineName}.{taskId}: Saving data to destination.", context.PipelineName, taskId);
-		await definition.TargetWriter.ExecuteUpsertAsync<TTarget>(
+		await definition.TargetWriter.ExecuteUpsertAsync(
 			definition.DestinationTableName,
 			targetData,
 			definition.KeyColumn

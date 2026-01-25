@@ -1,4 +1,4 @@
-﻿namespace TaskFactory.Common;
+﻿namespace TaskFactory.Data;
 
 public static class PipelineBuilderExtensions
 {

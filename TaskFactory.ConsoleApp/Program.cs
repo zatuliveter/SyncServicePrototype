@@ -8,7 +8,7 @@ using TaskFactory.ConsoleApp.Pipelines;
 IServiceCollection services = new ServiceCollection();
 
 TaskFactory.Bootstrapper.Initialize(services);
-TaskFactory.Common.Bootstrapper.Initialize(services);
+TaskFactory.Data.Bootstrapper.Initialize(services);
 TaskFactory.ConsoleApp.Bootstrapper.Initialize(services);
 
 IServiceProvider provider = services.BuildServiceProvider();
