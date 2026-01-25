@@ -6,8 +6,7 @@ namespace TaskFactory.ConsoleApp.Pipelines;
 
 public static class Pipelines
 {
-	public static readonly Pipeline DailyProcessing =
-		PipelineFactory.CreatePipeline(
+	public static readonly Pipeline DailyProcessing = PipelineFactory.CreatePipeline(
 		id: "daily",
 		runParams: new RunParameters(ParallelTaskCount: 1, FailureMode: PipelineFailureMode.ThrowException),
 		p =>
