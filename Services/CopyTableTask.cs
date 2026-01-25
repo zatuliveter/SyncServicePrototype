@@ -35,18 +35,3 @@ public class CopyTableTask<TSource, TTarget>
 	}
 }
 
-public static class CopyTableTask
-{
-	public static PipelineItem<CopyTableTask<TSource, TTarget>, CopyTableDefinition<TSource, TTarget>>
-		PipelineItem<TSource, TTarget>(
-			string id,
-			CopyTableDefinition<TSource, TTarget> parameters,
-			params string[]? dependsOn)
-		where TSource : class
-		where TTarget : class
-	{
-		return new PipelineItem<CopyTableTask<TSource, TTarget>, CopyTableDefinition<TSource, TTarget>>(
-			id, parameters, dependsOn);
-	}
-}
-

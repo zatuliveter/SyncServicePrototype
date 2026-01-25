@@ -15,7 +15,7 @@ public static class Pipelines
 				parameters: new SendEmailParams("test@test.com")
 			),
 
-			CopyTableTask.PipelineItem("load_products", parameters: ProductSync.Definition),
+			PipelineFactory.CopyTable("load_products", parameters: ProductSync.Definition),
 			
 			new Pipeline(
 				id: "group1",
