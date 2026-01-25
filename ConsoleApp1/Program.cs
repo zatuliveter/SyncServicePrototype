@@ -2,11 +2,11 @@
 using DataAccess;
 
 // Initialize provider
-IBulkUpsertProvider pg_provider = new PostgresBulkProvider(
+IDataWriter pg_provider = new PostgresBulkWriter(
 	"Host=localhost;Port=5433;Username=postgres;Password=123123;Database=sync_demo"
 );
 
-IBulkUpsertProvider mssql_provider = new SqlServerBulkProvider(
+IDataWriter mssql_provider = new SqlServerBulkWriter(
 	"Server=.;Database=sync_demo;Integrated Security=True;TrustServerCertificate=True;"
 );
 
@@ -17,7 +17,7 @@ try
 {
 	Console.WriteLine("Starting bulk upsert...");
 
-	foreach (IBulkUpsertProvider provider in (IBulkUpsertProvider[])[pg_provider, mssql_provider])
+	foreach (IDataWriter provider in (IDataWriter[])[pg_provider, mssql_provider])
 	{
 		Console.WriteLine(provider.GetType().Name);
 		await provider.ExecuteUpsertAsync<ProductDto>(

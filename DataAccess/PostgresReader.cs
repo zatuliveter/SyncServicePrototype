@@ -4,11 +4,11 @@ using System.Data;
 
 namespace DataAccess;
 
-public class PostgresReadProvider : IDataReadProvider
+public class PostgresReader : IDataReader
 {
 	private readonly string _connectionString;
 
-	public PostgresReadProvider(string connStr)
+	public PostgresReader(string connStr)
 	{
 		_connectionString = connStr;
 		// Global setting to handle snake_case columns in Postgres

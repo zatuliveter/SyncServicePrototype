@@ -5,7 +5,7 @@ using System.Data;
 
 namespace DataAccess;
 
-public class PostgresBulkProvider(string connStr) : IBulkUpsertProvider
+public class PostgresBulkWriter(string connStr) : IDataWriter
 {
 	private readonly string _connectionString = connStr;
 

@@ -2,7 +2,7 @@
 using System.Data;
 namespace DataAccess;
 
-public interface IDataReadProvider
+public interface IDataReader
 {
 	Task<IEnumerable<T>> QueryAsync<T>(
 		string sql,

@@ -4,7 +4,7 @@ using System.Data;
 
 namespace DataAccess;
 
-public class SqlServerReadProvider(string connStr) : IDataReadProvider
+public class SqlServerReader(string connStr) : IDataReader
 {
 	private readonly string _connectionString = connStr;
 

@@ -6,7 +6,7 @@ using System.Data;
 namespace DataAccess;
 
 
-public class SqlServerBulkProvider(string connStr) : IBulkUpsertProvider
+public class SqlServerBulkWriter(string connStr) : IDataWriter
 {
 	private readonly string _connectionString = connStr;
 
